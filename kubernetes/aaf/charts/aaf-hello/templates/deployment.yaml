@@ -77,6 +77,20 @@ spec:
 # Hello specific.  Clients don't don't need this, unless Registering with AAF Locator
           - name: aaf_locator_public_fqdn
             value: "{{.Values.global.aaf.public_fqdn}}"
+      - command:
+          - /bin/sh
+          - -c
+          - |
+            chmod -R 775 /opt/app/osaaf
+            chown -R 1000:1000 /opt/app/osaaf
+        securityContext:
+          privileged: true
+        image: busybox:1.28
+        imagePullPolicy: {{ .Values.global.pullPolicy | default .Values.pullPolicy }}
+        name: init-sysctl
+        volumeMounts:
+        - mountPath: /opt/app/osaaf
+          name: aaf-hello-vol
       containers:
       - name: {{ include "common.name" . }}
         command: ["bash","-c","cd /opt/app/aaf && if [ ! -d /opt/app/osaaf/etc ]; then cp -Rf etc logs /opt/app/osaaf; fi && exec bin/hello"]
