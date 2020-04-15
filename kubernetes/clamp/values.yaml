@@ -23,6 +23,27 @@ global: # global defaults
   loggingRepository: docker.elastic.co
   loggingImage: beats/filebeat:5.5.0
 
+secrets:
+  - uid: "db-root-pass"
+    name: &dbRootPassSecret '{{ include "common.release" . }}-vfc-db-root-pass'
+    type: password
+    password: '{{ .Values.config.mariadbRootPassword }}'
+
+db: &dbConfig
+  mariadbService: vfc-mariadb
+  mariadbPort: 3306
+  mariadbRootPasswordExternalSecret: *dbRootPassSecret
+  mariadbLogin: clds
+  mariadbPassword: sidnnd83K
+  mariadbRootPassword: prout
+
+mariadb:
+  config:
+    << : *dbConfig
+clamp-backend:
+  config:
+    << : *dbConfig
+
 subChartsOnly:
   enabled: true
 
@@ -30,8 +51,8 @@ flavor: small
 
 # application image
 repository: nexus3.onap.org:10001
-image: onap/clamp-frontend:5.0.3
-pullPolicy: Always
+image: onap/clamp-frontend:5.0.5
+pullPolicy: IfNotPresent
 
 # flag to enable debugging - application support required
 debugEnabled: false
@@ -44,6 +65,9 @@ config:
     logstashServiceName: log-ls
     logstashPort: 5044
   dataRootDir: /dockerdata-nfs
+  # uncomment to set a specific password
+#  mariadbRootPassword: emrys
+
 
 # default number of instances
 replicaCount: 1

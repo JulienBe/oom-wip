@@ -24,29 +24,21 @@ global: # global defaults
 # application image
 repository: nexus3.onap.org:10001
 image: mariadb:10.3.12
-pullPolicy: Always
+pullPolicy: IfNotPresent
 flavor: small
 
 #################################################################
 # Application configuration defaults.
 #################################################################
 config:
-  clampDrDb:
-    userName: datarouter
-    # uncomment this to set a specific password for the database
-#    userPassword: strong_pitchou
-#    userCredentialsExternalSecret: some secret
+  mysqlPassword: strong_pitchou
 
-#################################################################
-# Secrets metaconfig
-#################################################################
 secrets:
-  - uid: clamp-db-user-secret
-    name: '{{ include "common.release" . }}-clamp-db-user-secret'
-    type: basicAuth
-    externalSecret: '{{ tpl (default "" .Values.config.clampDrDb.userCredentialsExternalSecret) . }}'
-    login: '{{ .Values.config.clampDrDb.userName }}'
-    password: '{{ .Values.config.clampDrDb.userPassword }}'
+  - uid: "db-root-pass"
+    externalSecret: '{{ tpl (default "" .Values.config.mariadbRootPasswordExternalSecret) . }}'
+    type: password
+    password: '{{ .Values.config.mariadbRootPassword }}'
+    policy: required
 
 # default number of instances
 replicaCount: 1
@@ -102,7 +94,7 @@ ingress:
   enabled: false
 
 
-#resources: {}
+  #resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
